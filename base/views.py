@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import UserCreationForm
 from .models import Room, Topic, Message
-from .forms import RoomForm
+from .forms import RoomForm, ProfileUpdateForm
 
 # Create your views here.
 def login_user(request):
@@ -135,3 +135,15 @@ def user_profile(request, pk):
     topics = Topic.objects.all()
     return render(request, 'base/profile.html', {"user":user, "rooms":rooms, "room_messages":room_messages, "topics":topics})
 
+@login_required(login_url='login')
+def edit_profile(request, pk):
+    if request.method == "POST":
+        form = ProfileUpdateForm(request.POST, instance = request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Updated successfully")
+        else:
+            messages.error(request, "Something went wrong")
+    else:
+        form = ProfileUpdateForm(instance = request.user)
+    return render(request, 'base/edit_user_profile.html', {"form":form})
