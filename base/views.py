@@ -56,7 +56,8 @@ def home(request):
     rooms = Room.objects.filter(Q(topic__name__icontains=q) | Q(name__icontains=q) | Q(description__icontains=q))
     room_count = rooms.count()
     topics = Topic.objects.all()
-    context = {'rooms':rooms, 'topics':topics, 'room_count':room_count}
+    comments = Message.objects.filter(Q(room__topic__name__icontains=q))
+    context = {'rooms':rooms, 'topics':topics, 'room_count':room_count, 'room_messages':comments}
     return render(request, 'base/home.html', context)
 
 def room(request, pk):
@@ -82,6 +83,8 @@ def create_room(request):
     if request.method == "POST":
         form = RoomForm(request.POST)
         if form.is_valid():
+            room = form.save(commit=False)
+            room.host = request.user
             form.save()
             return redirect('home')
     context = {'form':form}
@@ -124,3 +127,11 @@ def delete_message(request, pk):
         message.delete()
         return redirect("home")
     return render(request, 'base/delete.html', {'obj':message})
+
+def user_profile(request, pk):
+    user = User.objects.get(username=pk)
+    rooms = user.room_set.all()
+    room_messages = user.message_set.all()
+    topics = Topic.objects.all()
+    return render(request, 'base/profile.html', {"user":user, "rooms":rooms, "room_messages":room_messages, "topics":topics})
+

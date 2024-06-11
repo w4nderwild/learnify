@@ -1,0 +1,13 @@
+<h3>Recent activity</h3>
+<div>
+  <ul>
+    {% for comment in room_messages %}
+    <li>
+      <span>@ {{comment.user.username}}</span>
+      <span>{{comment.created | timesince}} ago</span>
+      <span>in {{comment.room}}</span>
+      <p>{{comment.body}}</p>
+    </li>
+    {% endfor %}
+  </ul>
+</div>
